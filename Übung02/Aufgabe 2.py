@@ -24,27 +24,6 @@ def rand_init(y, x):
     return 2 * np.random.random([y, x]) - 1
 
 
-def mse(Y, a):
-    #print('Y: ', Y, '\na: ', a, '\nlen(a): ', len(a))
-
-    error = np.zeros(Y.shape)
-
-#    for i,j in enumerate(a):
-#        error[i] = (1 / len(a)) * np.sum((Y[i] - j)**2)
-
-    for i in range(a.shape[0]):
-        for j in range(a.shape[1]):
-            for k in range(a.shape[1]):
-                error[i][j] += (1 / len(a)) * ((Y[i][j] - a[i][k])**2)
-
-    #return (1 / len(a.T)) * np.sum((Y - a.T)**2)
-    #print(error)
-    return error
-
-
-def predict():
-    pass
-
 def main():
 
     """
@@ -70,8 +49,6 @@ def main():
 
     epochs = 10000
     eta = 0.1
-    lossOld = 1.
-    eps = 0.005
 
     # layers[input, hidden, output]
     layers = np.array([2, 4, 3])
@@ -80,8 +57,6 @@ def main():
     W2 = rand_init(layers[1], layers[2])
 
     for e in range(epochs):
-        i = np.random.randint(len(X))
-
         #forward prop
         L1 = np.dot(X, W1) # + B1
         A1 = sigmoid(L1)
@@ -89,10 +64,8 @@ def main():
         A2 = sigmoid(L2)
 
         error = Y - A2
-        loss = np.mean(np.abs(error)**2)
+        loss = np.mean(error**2)
         print('Epoch {}:\nloss: {}'.format(e, loss))
-        if(np.fabs(lossOld - loss) < eps ):
-            break
 
         delta2 = error * sigmoid_derived(L2)
         delta1 = delta2.dot(W2.T) * sigmoid_derived(L1)
