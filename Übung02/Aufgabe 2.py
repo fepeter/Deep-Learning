@@ -41,20 +41,9 @@ def mse(Y, a):
     #print(error)
     return error
 
-def backprop():
-    pass
-
 
 def predict():
     pass
-
-
-def evaluate(L):
-    ret = np.zeros(L.shape)
-    for i in range(len(L)):
-        ret[i] = round(float(L[i]))
-    return ret
-
 
 def main():
 
@@ -81,56 +70,49 @@ def main():
 
     epochs = 10000
     eta = 0.1
+    lossOld = 1.
+    eps = 0.005
 
     # layers[input, hidden, output]
     layers = np.array([2, 4, 3])
 
-    # + 1 for bias
     W1 = rand_init(layers[0], layers[1])
-    #B1 = rand_init(1, layers[1])
     W2 = rand_init(layers[1], layers[2])
-    #B2 = rand_init(1, layers[2])
-
-    #b = np.atleast_2d(np.ones(X.shape[0]))
-    #X = np.concatenate((b.T, X), axis=1)
 
     for e in range(epochs):
         i = np.random.randint(len(X))
 
         #forward prop
-        L1 = sigmoid(np.dot(X, W1)) # + B1
-        L2 = sigmoid(np.dot(L1, W2)) # + B2
+        L1 = np.dot(X, W1) # + B1
+        A1 = sigmoid(L1)
+        L2 = np.dot(A1, W2)# + B2
+        A2 = sigmoid(L2)
 
-        loss = mse(Y, L2)
-        #loss = Y-L2
-        print(loss)
+        error = Y - A2
+        loss = np.mean(np.abs(error)**2)
+        print('Epoch {}:\nloss: {}'.format(e, loss))
+        if(np.fabs(lossOld - loss) < eps ):
+            break
 
-        if (e % 10000) == 0:
-            print(
-            "Error:" + str(np.mean(np.abs(loss))))
-
-        delta2 = loss * sigmoid_derived(L2)
+        delta2 = error * sigmoid_derived(L2)
         delta1 = delta2.dot(W2.T) * sigmoid_derived(L1)
 
         #backprop
-        W2 += -eta * L1.T.dot(delta2)
-        W1 += -eta * X.T.dot(delta1)
+        W2 += eta * A1.T.dot(delta2)
+        W1 += eta * X.T.dot(delta1)
 
     #predict
     #for j in range(len(X)):
     L1 = sigmoid(np.dot(X, W1))  # + B1
     L2 = sigmoid(np.dot(L1, W2))  # + B2
-    print(L2)
-    #out = evaluate(L2.T)
-    '''
-    for j in len(X):
+
+    for j in range(len(X)):
         print(
             'INPUT:\t', X[j], '\n',
-            'OR:\t', out[0], ' (', L2.T[0], ')\n',
-            'AND:\t', out[1], ' (', L2.T[1], ')\n',
-            'XOR:\t', out[2], ' (', L2.T[2], ')\n'
+            'OR:\t', round(L2[j][0]), ' (', L2[j][0], ')\t(', float(Y[j][0]), ')\n',
+            'AND:\t', round(L2[j][1]), ' (', L2[j][1], ')\t(', float(Y[j][1]), ')\n',
+            'XOR:\t', round(L2[j][2]), ' (', L2[j][2], ')\t(', float(Y[j][2]), ')\n'
         )
-    '''
 
 
 if __name__ == '__main__':
